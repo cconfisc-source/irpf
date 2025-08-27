@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orçamento — Imposto de Renda</title>
+  <meta name="description" content="Formulário para orçamento de declaração de Imposto de Renda." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-card: #0f172a; /* azul escuro */
+      --bg-soft: #111827; /* quase preto */
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --brand: #2563eb; /* azul */
+      --brand-2: #38bdf8; /* azul claro */
+      --ok: #10b981;
+      --warn: #f59e0b;
+      --err: #ef4444;
+      --radius: 16px;
+      --shadow: 0 20px 40px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box }
+    html, body { height: 100% }
+    body {
+      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: linear-gradient(180deg, var(--bg) 0%, #090c19 100%);
+      color: var(--text);
+    }
+    a { color: var(--brand-2); text-decoration: none }
+    .container { max-width: 1040px; margin: 0 auto; padding: 24px }
+    header {
+      position: sticky; top: 0; z-index: 20; backdrop-filter: saturate(180%) blur(8px);
+      background: linear-gradient(180deg, rgba(9,12,25,.8), rgba(9,12,25,.6));
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .nav { display:flex; align-items:center; justify-content:space-between; gap:16px; padding: 14px 24px }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:700; letter-spacing:.3px }
+    .badge { font-size: 12px; padding: 4px 8px; border-radius: 999px; background: rgba(56,189,248,.12); color: #bae6fd; border: 1px solid rgba(56,189,248,.25) }
+    .cta { appearance:none; border:none; cursor:pointer; background: linear-gradient(135deg, var(--brand) 0%, #1d4ed8 40%, #0ea5e9 100%);
+      color: white; padding: 12px 16px; border-radius: 12px; font-weight: 600; box-shadow: var(--shadow);}
+    .cta.secondary { background: #0b1223; border: 1px solid rgba(255,255,255,.08); box-shadow: none; color: var(--text) }
+    .hero {
+      display:grid; grid-template-columns: 1.15fr .85fr; gap: 28px; align-items: center;
+      padding: 32px 24px 8px;
+    }
+    .hero h1 { font-size: clamp(28px, 2.6vw, 44px); margin: 0 0 10px; line-height: 1.1 }
+    .hero p { color: var(--muted); margin: 0 0 16px }
+    .pillbar { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 8px }
+    .pill { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: rgba(37,99,235,.12); color:#bfdbfe; border:1px solid rgba(37,99,235,.3) }
+
+    .card { background: linear-gradient(180deg, rgba(17,24,39,.65), rgba(17,24,39,.9)); border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden }
+    .card h2 { margin: 0 0 4px; font-size: 18px }
+    .card .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px }
+
+    form { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; padding: 20px }
+    fieldset { grid-column: 1/-1; border: 1px dashed rgba(255,255,255,.12); border-radius: 14px; padding: 16px }
+    legend { padding: 0 8px; font-weight: 600; color: #c7d2fe }
+
+    .col-6 { grid-column: span 6 }
+    .col-4 { grid-column: span 4 }
+    .col-3 { grid-column: span 3 }
+    .col-12 { grid-column: span 12 }
+
+    label { display:block; font-size: 13px; color: var(--muted); margin-bottom: 6px }
+    input, select, textarea { width: 100%; background: #0b1223; color: var(--text); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px; padding: 12px 14px; outline: none; transition: border .15s, box-shadow .15s }
+    textarea { min-height: 96px; resize: vertical }
+    input:focus, select:focus, textarea:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(37,99,235,.25) }
+    .help { font-size: 12px; color: var(--muted); margin-top: 6px }
+    .inline { display:flex; align-items:center; gap: 10px }
+
+    .grid-check { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 8px }
+    .check {
+      background:#0b1223; border:1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 10px 12px; display:flex; align-items:center; gap: 10px
+    }
+    .check input { width: auto }
+
+    .footer { display:flex; align-items:center; justify-content:space-between; gap: 12px; padding: 16px; border-top:1px solid rgba(255,255,255,.06) }
+    .muted { color: var(--muted); font-size: 12px }
+
+    .success { display:none; padding: 16px; border-top: 1px solid rgba(255,255,255,.06); color: #d1fae5; background: rgba(16,185,129,.08) }
+    .error { display:none; padding: 16px; border-top: 1px solid rgba(255,255,255,.06); color: #fee2e2; background: rgba(239,68,68,.08) }
+
+    /* destaque dos campos inválidos APENAS após tentativa de envio */
+    .submitted input:invalid, .submitted select:invalid, .submitted textarea:invalid {
+      border-color: var(--err);
+      box-shadow: 0 0 0 3px rgba(239,68,68,.18);
+    }
+
+    @media (max-width: 900px){
+      .hero { grid-template-columns: 1fr; }
+      .col-6, .col-4, .col-3 { grid-column: span 12 }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav container">
+      <div class="brand">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 3l8.5 4.9v7.2L12 20.9 3.5 15.1V7.9L12 3z" stroke="#60a5fa" stroke-width="1.2" fill="url(#g)"/>
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#1d4ed8"/>
+              <stop offset="1" stop-color="#0ea5e9"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>Orçamento — IRPF</span>
+        <span class="badge">2025</span>
+      </div>
+      <div class="inline">
+        <a class="cta secondary" href="#duvidas">Dúvidas</a>
+        <a class="cta" href="#form">Fazer orçamento</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero container">
+    <div>
+      <h1>Faça seu orçamento de Imposto de Renda em poucos minutos</h1>
+      <p>
+        Preencha o formulário abaixo com seus dados e o perfil da sua declaração. Recebemos as informações e retornamos
+        com o valor e o passo a passo para concluir sua IRPF com segurança.
+      </p>
+      <div class="pillbar">
+        <span class="pill">Seguro e sigiloso</span>
+        <span class="pill">Atendimento humano</span>
+        <span class="pill">Prazo combinado</span>
+        <span class="pill">Orientação de documentos</span>
+      </div>
+    </div>
+    <div class="card" style="padding:18px">
+      <h2>Como funciona</h2>
+      <p class="sub">Envie seus dados → Análise do perfil → Retorno com valor e prazos → Contratação opcional</p>
+      <ol style="margin:0; padding-left:18px; color:var(--muted)">
+        <li>Leva ~3–5 minutos para preencher.</li>
+        <li>Você recebe a confirmação no e-mail e/ou WhatsApp.</li>
+        <li>Usamos seus dados apenas para este orçamento.</li>
+      </ol>
+    </div>
+  </section>
+
+  <main id="form" class="container">
+    <div class="card">
+      <form id="orcamentoForm" novalidate>
+        <!-- Dados pessoais -->
+        <fieldset>
+          <legend>1) Dados pessoais</legend>
+          <div class="col-6">
+            <label for="nome">Nome completo *</label>
+            <input id="nome" name="nome" autocomplete="name" required />
+          </div>
+          <div class="col-6">
+            <label for="email">E-mail *</label>
+            <input id="email" name="email" type="email" autocomplete="email" required />
+          </div>
+          <div class="col-4">
+            <label for="whats">WhatsApp *</label>
+            <input id="whats" name="whats" inputmode="numeric" placeholder="(11) 90000-0000" required />
+            <div class="help">Usaremos para agilizar seu retorno.</div>
+          </div>
+
+          <!-- CPF REMOVIDO conforme solicitado -->
+
+          <div class="col-4">
+            <label for="estado">Estado *</label>
+            <select id="estado" name="estado" required>
+              <option value="" disabled selected>Selecione</option>
+              <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option>
+              <option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option>
+              <option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option>
+              <option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option>
+            </select>
+          </div>
+        </fieldset>
+
+        <!-- Perfil da declaração -->
+        <fieldset>
+          <legend>2) Perfil da sua declaração</legend>
+          <div class="col-6">
+            <label for="situacao">Situação *</label>
+            <select id="situacao" name="situacao" required>
+              <option value="" disabled selected>Selecione</option>
+              <option>Primeira declaração</option>
+              <option>Declaração do ano anterior</option>
+              <option>Retificação</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label for="regime">Regime pretendido *</label>
+            <select id="regime" name="regime" required>
+              <option value="" disabled selected>Selecione</option>
+              <option>Completa (com deduções)</option>
+              <option>Simplificada</option>
+              <option>Indefinido — avaliar</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label>Dependentes</label>
+            <div class="grid-check">
+              <label class="check"><input type="checkbox" name="dependentes" value="Conjuge"> Cônjuge</label>
+              <label class="check"><input type="checkbox" name="dependentes" value="Filhos"> Filhos</label>
+              <label class="check"><input type="checkbox" name="dependentes" value="Pais"> Pais</label>
+              <label class="check"><input type="checkbox" name="dependentes" value="Outros"> Outros</label>
+              <label class="check"><input type="checkbox" name="dependentes" value="NaoPossuo"> Não possuo</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Rendas e operações -->
+        <fieldset>
+          <legend>3) Rendas, bens e operações</legend>
+          <div class="col-12">
+            <label>Selecione o que se aplica a você</label>
+            <div class="grid-check">
+              <label class="check"><input type="checkbox" name="itens" value="EmpregoCLT"> Emprego CLT</label>
+              <label class="check"><input type="checkbox" name="itens" value="MEI"> MEI</label>
+              <label class="check"><input type="checkbox" name="itens" value="PJLucro"> Sócio/Pró-labore em PJ</label>
+              <label class="check"><input type="checkbox" name="itens" value="Autonomo"> Autônomo</label>
+              <label class="check"><input type="checkbox" name="itens" value="Aluguel"> Aluguel recebido</label>
+              <label class="check"><input type="checkbox" name="itens" value="Previdencia"> Aposentadoria/INSS</label>
+              <label class="check"><input type="checkbox" name="itens" value="RendimentosExterior"> Rendimentos do exterior</label>
+              <label class="check"><input type="checkbox" name="itens" value="FiisAcoes"> Ações/FIIs</label>
+              <label class="check"><input type="checkbox" name="itens" value="DayTrade"> Day trade</label>
+              <label class="check"><input type="checkbox" name="itens" value="Cripto"> Criptomoedas</label>
+              <label class="check"><input type="checkbox" name="itens" value="Veiculos"> Compra/venda de veículos</label>
+              <label class="check"><input type="checkbox" name="itens" value="Imoveis"> Compra/venda de imóveis</label>
+              <label class="check"><input type="checkbox" name="itens" value="Heranca"> Herança/Doação</label>
+              <label class="check"><input type="checkbox" name="itens" value="Pensao"> Pensão alimentícia</label>
+              <label class="check"><input type="checkbox" name="itens" value="Outros"> Outros</label>
+            </div>
+            <div class="help">Marcando estas opções conseguimos estimar a complexidade do seu caso.</div>
+          </div>
+
+          <div class="col-6">
+            <label for="numFontes">Quantas fontes pagadoras? (aprox.)</label>
+            <input id="numFontes" name="numFontes" type="number" min="0" step="1" />
+          </div>
+          <div class="col-6">
+            <label for="patrimonio">Patrimônio total aproximado (R$)</label>
+            <input id="patrimonio" name="patrimonio" inputmode="decimal" placeholder="0,00" />
+          </div>
+        </fieldset>
+
+        <!-- Despesas dedutíveis -->
+        <fieldset>
+          <legend>4) Despesas dedutíveis (se houver)</legend>
+          <div class="col-12 grid-check">
+            <label class="check"><input type="checkbox" name="deducoes" value="Saude"> Saúde</label>
+            <label class="check"><input type="checkbox" name="deducoes" value="Educacao"> Educação</label>
+            <label class="check"><input type="checkbox" name="deducoes" value="PrevidenciaPrivada"> Previdência privada</label>
+            <label class="check"><input type="checkbox" name="deducoes" value="PensaoJudicial"> Pensão judicial</label>
+            <label class="check"><input type="checkbox" name="deducoes" value="EmpregadorDomestico"> INSS empregador doméstico</label>
+          </div>
+        </fieldset>
+
+        <!-- Uploads -->
+        <fieldset>
+          <legend>5) Documentos (opcional)</legend>
+          <div class="col-12">
+            <label for="docs">Se quiser, anexe arquivos (PDF/JPG/PNG) com seus informes (máx. 10):</label>
+            <input id="docs" name="docs" type="file" accept=".pdf,.jpg,.jpeg,.png" multiple />
+            <div class="help">O envio é opcional nesta etapa. Também podemos solicitar depois por e-mail/WhatsApp.</div>
+          </div>
+        </fieldset>
+
+        <!-- Observações -->
+        <fieldset>
+          <legend>6) Observações</legend>
+          <div class="col-12">
+            <label for="obs">Conte-nos algo que ajude no orçamento (opcional)</label>
+            <textarea id="obs" name="obs" placeholder="Ex.: tenho 2 informes de rendimento, vendi um carro e tenho gastos médicos"></textarea>
+          </div>
+        </fieldset>
+
+        <div class="footer">
+          <div class="muted">* Campos obrigatórios. Seus dados são tratados com sigilo.</div>
+          <div class="inline">
+            <button type="button" class="cta secondary" id="btnWhats">Falar no WhatsApp</button>
+            <button type="submit" class="cta">Enviar para orçamento</button>
+          </div>
+        </div>
+
+        <div id="msgSucesso" class="success">✅ Recebemos seu pedido de orçamento! Em breve retornaremos por e-mail/WhatsApp.</div>
+        <div id="msgErro" class="error">❌ Ocorreu um erro ao enviar. Revise os campos obrigatórios e tente novamente.</div>
+      </form>
+    </div>
+
+    <section id="duvidas" class="card" style="margin-top:16px; padding:18px">
+      <h2>Dúvidas frequentes</h2>
+      <details>
+        <summary>Como calculam o valor do meu orçamento?</summary>
+        <p class="muted">Analisamos a complexidade (fontes de renda, investimentos, bens, deduções, documentos) e retornamos com um valor justo e prazo estimado.</p>
+      </details>
+      <details>
+        <summary>Posso enviar depois os documentos?</summary>
+        <p class="muted">Sim. Este formulário serve para entender seu perfil. Somente após o aceite do orçamento pediremos os documentos necessários.</p>
+      </details>
+      <details>
+        <summary>Meus dados ficam seguros?</summary>
+        <p class="muted">Usamos seus dados exclusivamente para este orçamento e não compartilhamos com terceiros.</p>
+      </details>
+    </section>
+
+    <footer class="container" style="text-align:center; color:var(--muted); padding:24px 0 56px">
+      <small>© <span id="ano"></span> — Orçamentos IRPF. Todos os direitos reservados.</small>
+    </footer>
+  </main>
+
+  <script>
+    // === CONFIGURAÇÕES ===
+    // 1) Defina um endpoint de recebimento do formulário (ex.: Formspree, Getform, Google Apps Script, seu backend)
+    //    Substitua a URL abaixo por seu endpoint e deixe method="POST".
+    const FORM_ENDPOINT = "https://formspree.io/f/xgvlepnp"; // exemplo: "https://formspree.io/f/SEU_ID"
+
+    // 2) Informe seu número do WhatsApp em formato internacional para o botão rápido
+    const WHATS_NUMBER = "5599999999999"; // ex.: 55 + DDD + número
+
+    // === UTILITÁRIOS ===
+    const form = document.getElementById('orcamentoForm');
+    const msgOk = document.getElementById('msgSucesso');
+    const msgErr = document.getElementById('msgErro');
+
+    // Máscara simples para telefone (mantida)
+    function maskPhone(v){
+      const nums = v.replace(/\\D/g,'').slice(0,11);
+      if(nums.length <= 10){
+        return nums.replace(/(\\d{2})(\\d{4})(\\d{0,4})/, '($1) $2-$3');
+      }
+      return nums.replace(/(\\d{2})(\\d{5})(\\d{0,4})/, '($1) $2-$3');
+    }
+    document.getElementById('whats').addEventListener('input', e => e.target.value = maskPhone(e.target.value));
+
+    // Moeda brasileira simples
+    const patrimonio = document.getElementById('patrimonio');
+    patrimonio.addEventListener('input', (e)=>{
+      let v = e.target.value.replace(/\\D/g,'');
+      v = (parseInt(v||'0',10)).toString();
+      while(v.length < 3) v = '0' + v;
+      const reais = v.slice(0, -2);
+      const cent = v.slice(-2);
+      e.target.value = new Intl.NumberFormat('pt-BR').format(reais) + ',' + cent;
+    });
+
+    // Submissão
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      // remover mensagens
+      msgOk.style.display = 'none';
+      msgErr.style.display = 'none';
+      // garantir que a classe submitted seja removida em tentativas repetidas
+      form.classList.remove('submitted');
+
+      // Validação mínima: se inválido, mostra validação nativa e destaca campos
+      if(!form.checkValidity()){
+        form.classList.add('submitted'); // aplica estilo vermelho nos campos inválidos
+        // mostra as mensagens nativas do browser (reportValidity) e foca o primeiro inválido
+        form.reportValidity();
+        const firstInvalid = form.querySelector(':invalid');
+        if(firstInvalid && typeof firstInvalid.focus === 'function') firstInvalid.focus();
+        return;
+      }
+
+      // Montar payload
+      const data = new FormData(form);
+
+      // Se não houver endpoint definido, apenas simula sucesso
+      if(!FORM_ENDPOINT){
+        msgOk.style.display = 'block';
+        form.reset();
+        form.classList.remove('submitted');
+        return;
+      }
+
+      try {
+        const res = await fetch(FORM_ENDPOINT, {
+          method: 'POST',
+          body: data
+        });
+        if(res.ok){
+          msgOk.style.display = 'block';
+          form.reset();
+          form.classList.remove('submitted');
+        } else {
+          // mostra erro global (envio falhou)
+          msgErr.style.display = 'block';
+        }
+      } catch(err){
+        console.error(err);
+        msgErr.style.display = 'block';
+      }
+    });
+
+    // WhatsApp rápido com pré-texto
+    document.getElementById('btnWhats').addEventListener('click', ()=>{
+      const nome = document.getElementById('nome').value || '';
+      const txt = encodeURIComponent(`Olá! Gostaria de um orçamento para minha declaração de IRPF. Meu nome é ${nome}.`);
+      const url = `https://wa.me/${WHATS_NUMBER}?text=${txt}`;
+      window.open(url, '_blank');
+    });
+
+    document.getElementById('ano').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
