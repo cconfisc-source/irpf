@@ -350,54 +350,54 @@
     });
 
     // Submissão
-    form.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      // remover mensagens
-      msgOk.style.display = 'none';
-      msgErr.style.display = 'none';
-      // garantir que a classe submitted seja removida em tentativas repetidas
-      form.classList.remove('submitted');
+form.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  msgOk.style.display = 'none';
+  msgErr.style.display = 'none';
+  form.classList.remove('submitted');
 
-      // Validação mínima: se inválido, mostra validação nativa e destaca campos
-      if(!form.checkValidity()){
-        form.classList.add('submitted'); // aplica estilo vermelho nos campos inválidos
-        // mostra as mensagens nativas do browser (reportValidity) e foca o primeiro inválido
-        form.reportValidity();
-        const firstInvalid = form.querySelector(':invalid');
-        if(firstInvalid && typeof firstInvalid.focus === 'function') firstInvalid.focus();
-        return;
-      }
+  if(!form.checkValidity()){
+    form.classList.add('submitted');
+    form.reportValidity();
+    const firstInvalid = form.querySelector(':invalid');
+    if(firstInvalid && typeof firstInvalid.focus === 'function') firstInvalid.focus();
+    return;
+  }
 
-      // Montar payload
-      const data = new FormData(form);
+  const data = new FormData(form);
 
-      // Se não houver endpoint definido, apenas simula sucesso
-      if(!FORM_ENDPOINT){
-        msgOk.style.display = 'block';
-        form.reset();
-        form.classList.remove('submitted');
-        return;
-      }
+  if(!FORM_ENDPOINT){
+    msgOk.style.display = 'block';
+    form.reset();
+    form.classList.remove('submitted');
+    return;
+  }
 
-      try {
-        const res = await fetch(FORM_ENDPOINT, {
-          method: 'POST',
-          body: data
-        });
-        if(res.ok){
-          msgOk.style.display = 'block';
-          form.reset();
-          form.classList.remove('submitted');
-        } else {
-          // mostra erro global (envio falhou)
-          msgErr.style.display = 'block';
-        }
-      } catch(err){
-        console.error(err);
-        msgErr.style.display = 'block';
-      }
+  try {
+    const res = await fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
     });
 
+    const json = await res.json();
+
+    if(res.ok && json.ok !== false){ 
+      // sucesso real
+      msgOk.style.display = 'block';
+      form.reset();
+      form.classList.remove('submitted');
+    } else {
+      // erro no retorno
+      msgErr.style.display = 'block';
+      console.error("Erro do Formspree:", json);
+    }
+
+  } catch(err){
+    console.error(err);
+    msgErr.style.display = 'block';
+  }
+});
     // WhatsApp rápido com pré-texto
     document.getElementById('btnWhats').addEventListener('click', ()=>{
       const nome = document.getElementById('nome').value || '';
